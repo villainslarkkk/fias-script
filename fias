@@ -24,6 +24,9 @@ local selfSection = selfSubPage:Section({
     Side = 1
 })
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
 selfSection:Dropdown({
     Name = "fight styles",
     Flag = "styles",
@@ -41,16 +44,11 @@ selfSection:Dropdown({
         "Baddie",
         "Slap Boxer"
     },
-    Callback = function(styleName)
-        local localPlayer = game.Players.LocalPlayer
-        local leaderstats = localPlayer:FindFirstChild("leaderstats")
+    Callback = function(style)
+        local class = LocalPlayer:WaitForChild("leaderstats"):WaitForChild("Class")
 
-        if leaderstats then
-            local classValue = leaderstats:FindFirstChild("Class")
-
-            if classValue and classValue:IsA("StringValue") then
-                classValue.Value = styleName
-            end
+        if class:IsA("StringValue") then
+            class.Value = style
         end
     end
 })
@@ -217,221 +215,6 @@ while (Configuration.Kill_Aura) do
         end
     end
     task.wait()
-    end
-})
-
-local SlamAuraToggle = CombatSection:Toggle({
-    Name = "slam Aura",
-    Flag = "Kill Aura",
-    Default = false,
-    Callback = function(Value)
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local LocalPlayer = Players.LocalPlayer
-local CurrentCamera = workspace.CurrentCamera
-
-local Configuration = {
-    Kill_Aura = true,
-    Kill_Aura_Range = 25,
-    Void_Spam = true,
-
-    Attack_Limbs = {
-        "LeftHand",
-        "RightHand"
-    }
-}
-
-local HitboxFunction = nil
-local function FindHitboxFunction()
-    for Index, Object in pairs(getgc(false)) do
-        if (typeof(Object) ~= "function") then
-            continue
-        end
-        if (islclosure(Object)) then
-            local Info = debug.getinfo(Object)
-            if (getfenv(Object).script == LocalPlayer.Character.Core) then
-                if (Info.currentline ~= 683) then
-                    continue
-                end
-                HitboxFunction = Object
-            end
-        end
-    end
-end
-FindHitboxFunction()
-LocalPlayer.CharacterAdded:Connect(FindHitboxFunction)
-
-local function Character()
-    if LocalPlayer.Character then
-        return LocalPlayer.Character
-    end
-    LocalPlayer.CharacterAdded:Wait()
-    return Character()
-end
-
-while (Configuration.Kill_Aura) do
-    for Index, Player in ipairs(Players:GetPlayers()) do
-        if (Player.Character and Player ~= LocalPlayer and Character():FindFirstChild("Fight")) then
-            local HRPPlayer = Player.Character:FindFirstChild("HumanoidRootPart")
-            local HumanoidPlayer = Player.Character:FindFirstChild("Humanoid")
-            local HRPSelf = Character():FindFirstChild("HumanoidRootPart")
-
-            if (HRPPlayer and HRPSelf and HumanoidPlayer.Health > 0) then
-                if (Player.Character:FindFirstChild("Highlight")) then
-                    local Highlight = Player.Character:FindFirstChild("Highlight")
-
-                    if Highlight.OutlineColor == Color3.fromRGB(143, 255, 137) then
-                        continue
-                    end
-                end
-                local Magnitude = (HRPPlayer.Position - HRPSelf.Position).Magnitude
-
-                if Magnitude <= Configuration.Kill_Aura_Range then
-                    local Old_Position = HRPSelf.Position
-                    local Old_CFrame = CurrentCamera.CFrame
-
-                    HRPSelf.CFrame = CFrame.new(HRPPlayer.Position + (-2 * HumanoidPlayer.MoveDirection))
-                    task.wait(.05)
-
-                    CurrentCamera.CFrame = CFrame.lookAt(HRPSelf.Position, HRPPlayer.Position)
-                    task.spawn(HitboxFunction, "slam", Configuration.Attack_Limbs[math.random(1, 2)], false, false)
-                    task.wait(.05)
-
-                    if Configuration.Void_Spam then
-                        HRPSelf.CFrame = CFrame.new(HRPPlayer.Position - Vector3.new(0, 5, 0))
-                    end
-                    task.wait(.05)
-
-                    HRPSelf.CFrame = CFrame.new(Old_Position)
-                    CurrentCamera.CFrame = Old_CFrame
-                end
-            end
-        end
-    end
-    task.wait()
-    end
-})
-
-local AutoFarmsPage = Window:Page({
-    Name = "Auto Farms",
-    SubPages = true,
-    Icon = "rbxassetid://85112456002145"
-})
-
-local FarmsSubPage = AutoFarmsPage:SubPage({
-    Name = "Local Farming Options",
-    Columns = 2
-})
-
-local AutofarmsSection = farmsSubPage:Section({
-    Name = "farm options",
-    Side = 1
-})
-
-local FarmkillsToggle = CombatSection:Toggle({
-    Name = "Autofarm Kills",
-    Flag = "Kill Aura",
-    Default = false,
-    Callback = function(Value)
-while true do
-    local target = GetNextTarget()
-
-    if target then
-        local humanoid = target:FindFirstChild("Humanoid")
-
-        if humanoid then
-            repeat
-                task.wait()
-            until humanoid.Health <= 0
-            local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local LocalPlayer = Players.LocalPlayer
-local CurrentCamera = workspace.CurrentCamera
-
-local Configuration = {
-    Kill_Aura = true,
-    Kill_Aura_Range = 25,
-    Void_Spam = true,
-
-    Attack_Limbs = {
-        "LeftHand",
-        "RightHand"
-    }
-}
-
-local HitboxFunction = nil
-local function FindHitboxFunction()
-    for Index, Object in pairs(getgc(false)) do
-        if (typeof(Object) ~= "function") then
-            continue
-        end
-        if (islclosure(Object)) then
-            local Info = debug.getinfo(Object)
-            if (getfenv(Object).script == LocalPlayer.Character.Core) then
-                if (Info.currentline ~= 683) then
-                    continue
-                end
-                HitboxFunction = Object
-            end
-        end
-    end
-end
-FindHitboxFunction()
-LocalPlayer.CharacterAdded:Connect(FindHitboxFunction)
-
-local function Character()
-    if LocalPlayer.Character then
-        return LocalPlayer.Character
-    end
-    LocalPlayer.CharacterAdded:Wait()
-    return Character()
-end
-
-while (Configuration.Kill_Aura) do
-    for Index, Player in ipairs(Players:GetPlayers()) do
-        if (Player.Character and Player ~= LocalPlayer and Character():FindFirstChild("Fight")) then
-            local HRPPlayer = Player.Character:FindFirstChild("HumanoidRootPart")
-            local HumanoidPlayer = Player.Character:FindFirstChild("Humanoid")
-            local HRPSelf = Character():FindFirstChild("HumanoidRootPart")
-
-            if (HRPPlayer and HRPSelf and HumanoidPlayer.Health > 0) then
-                if (Player.Character:FindFirstChild("Highlight")) then
-                    local Highlight = Player.Character:FindFirstChild("Highlight")
-
-                    if Highlight.OutlineColor == Color3.fromRGB(143, 255, 137) then
-                        continue
-                    end
-                end
-                local Magnitude = (HRPPlayer.Position - HRPSelf.Position).Magnitude
-
-                if Magnitude <= Configuration.Kill_Aura_Range then
-                    local Old_Position = HRPSelf.Position
-                    local Old_CFrame = CurrentCamera.CFrame
-
-                    HRPSelf.CFrame = CFrame.new(HRPPlayer.Position + (-2 * HumanoidPlayer.MoveDirection))
-                    task.wait(.05)
-
-                    CurrentCamera.CFrame = CFrame.lookAt(HRPSelf.Position, HRPPlayer.Position)
-                    task.spawn(HitboxFunction, "Attack", Configuration.Attack_Limbs[math.random(1, 2)], false, false)
-                    task.wait(.05)
-
-                    if Configuration.Void_Spam then
-                        HRPSelf.CFrame = CFrame.new(HRPPlayer.Position - Vector3.new(0, 5, 0))
-                    end
-                    task.wait(.05)
-
-                    HRPSelf.CFrame = CFrame.new(Old_Position)
-                    CurrentCamera.CFrame = Old_CFrame
-                end
-            end
-        end
-    end
-    task.wait()
-        end
     end
 })
 
