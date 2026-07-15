@@ -121,7 +121,7 @@ local CombatSubPage = CombatPage:SubPage({
     Columns = 2
 })
 
-local combatSection = CombatSubPage:Section({
+local CombatSection = CombatSubPage:Section({
     Name = "Combat options",
     Side = 1
 })
@@ -220,7 +220,7 @@ while (Configuration.Kill_Aura) do
     end
 })
 
-local KillAuraToggle = CombatSection:Toggle({
+local SlamAuraToggle = CombatSection:Toggle({
     Name = "slam Aura",
     Flag = "Kill Aura",
     Default = false,
@@ -330,7 +330,7 @@ local AutofarmsSection = farmsSubPage:Section({
     Side = 1
 })
 
-local KillFarmToggle = CombatSection:Toggle({
+local FarmkillsToggle = CombatSection:Toggle({
     Name = "Autofarm Kills",
     Flag = "Kill Aura",
     Default = false,
