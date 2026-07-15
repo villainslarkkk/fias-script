@@ -1,0 +1,596 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/NIcoGabrielRealYtr/Midnight-Hub-Library/refs/heads/main/Source"))()
+
+local Window = Library:Window({
+    Name = "Villain.gg"
+})
+
+local Watermark = Library:Watermark("villain.gg")
+
+local KeyList = Library:KeybindList()
+
+local selfPage = Window:Page({
+    Name = "Self",
+    SubPages = true,
+    Icon = "rbxassetid://101118444346965"
+})
+
+local selfSubPage = selfPage:SubPage({
+    Name = "Local Player Options",
+    Columns = 2
+})
+
+local selfSection = selfSubPage:Section({
+    Name = "player options",
+    Side = 1
+})
+
+selfSection:Dropdown({
+    Name = "fight styles",
+    Flag = "styles",
+    Default = "HitMan",
+    Items = {
+        "HitMan",
+        "Philly",
+        "Boxer",
+        "Stud",
+        "Ninja",
+        "Hawk",
+        "Savage",
+        "Bones",
+        "Squabble",
+        "Baddie",
+        "Slap Boxer"
+    },
+    Callback = function(styleName)
+        local localPlayer = game.Players.LocalPlayer
+        local leaderstats = localPlayer:FindFirstChild("leaderstats")
+
+        if leaderstats then
+            local classValue = leaderstats:FindFirstChild("Class")
+
+            if classValue and classValue:IsA("StringValue") then
+                classValue.Value = styleName
+            end
+        end
+    end
+})
+
+local selfSubPage = selfPage:SubPage({
+    Name = "Local Teleport Options",
+    Columns = 2
+})
+
+local selfSection = selfSubPage:Section({
+    Name = "Teleport options",
+    Side = 1
+})
+
+local Locations = {
+    Gym = CFrame.new(-200.762177, 4.49409294, -11.9695215),
+    Outside = CFrame.new(-218.090515, 4.49505663, -155.989746),
+    LockerRoom = CFrame.new(-100.200127, 4.49409246, -29.9776249),
+    Library = CFrame.new(-124.827629, 4.49459267, 126.185669),
+    Cafeteria = CFrame.new(-340.142059, 4.49459267, 121.162399),
+    Roof = CFrame.new(-195.359451, 41.4945908, -54.2340965)
+}
+
+local SelectedTeleport = "Gym"
+
+selfSection:Dropdown({
+    Name = "Locations",
+    Flag = "locations",
+    Default = "Gym",
+    Items = {
+        "Gym",
+        "Outside",
+        "LockerRoom",
+        "Library",
+        "Cafeteria",
+        "Roof"
+    },
+    Callback = function(Value)
+        SelectedTeleport = Value
+    end
+})
+
+local ActionButtons = selfSection:Button({
+    Name = "Teleport"
+})
+
+ActionButtons:Add("teleport to selected location", function()
+    local pos = Locations[SelectedTeleport]
+
+    if pos then
+        local character = game.Players.LocalPlayer.Character
+        local hrp = character and character:FindFirstChild("HumanoidRootPart")
+
+        if hrp then
+            hrp.CFrame = pos
+        end
+    end
+end)
+
+local CombatPage = Window:Page({
+    Name = "Combat",
+    SubPages = true,
+    Icon = "rbxassetid://85112456002145"
+})
+
+local CombatSubPage = CombatPage:SubPage({
+    Name = "Local Combat Options",
+    Columns = 2
+})
+
+local combatSection = CombatSubPage:Section({
+    Name = "Combat options",
+    Side = 1
+})
+
+local KillAuraToggle = CombatSection:Toggle({
+    Name = "Kill Aura",
+    Flag = "Kill Aura",
+    Default = false,
+    Callback = function(Value)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local CurrentCamera = workspace.CurrentCamera
+
+local Configuration = {
+    Kill_Aura = true,
+    Kill_Aura_Range = 25,
+    Void_Spam = true,
+
+    Attack_Limbs = {
+        "LeftHand",
+        "RightHand"
+    }
+}
+
+local HitboxFunction = nil
+local function FindHitboxFunction()
+    for Index, Object in pairs(getgc(false)) do
+        if (typeof(Object) ~= "function") then
+            continue
+        end
+        if (islclosure(Object)) then
+            local Info = debug.getinfo(Object)
+            if (getfenv(Object).script == LocalPlayer.Character.Core) then
+                if (Info.currentline ~= 683) then
+                    continue
+                end
+                HitboxFunction = Object
+            end
+        end
+    end
+end
+FindHitboxFunction()
+LocalPlayer.CharacterAdded:Connect(FindHitboxFunction)
+
+local function Character()
+    if LocalPlayer.Character then
+        return LocalPlayer.Character
+    end
+    LocalPlayer.CharacterAdded:Wait()
+    return Character()
+end
+
+while (Configuration.Kill_Aura) do
+    for Index, Player in ipairs(Players:GetPlayers()) do
+        if (Player.Character and Player ~= LocalPlayer and Character():FindFirstChild("Fight")) then
+            local HRPPlayer = Player.Character:FindFirstChild("HumanoidRootPart")
+            local HumanoidPlayer = Player.Character:FindFirstChild("Humanoid")
+            local HRPSelf = Character():FindFirstChild("HumanoidRootPart")
+
+            if (HRPPlayer and HRPSelf and HumanoidPlayer.Health > 0) then
+                if (Player.Character:FindFirstChild("Highlight")) then
+                    local Highlight = Player.Character:FindFirstChild("Highlight")
+
+                    if Highlight.OutlineColor == Color3.fromRGB(143, 255, 137) then
+                        continue
+                    end
+                end
+                local Magnitude = (HRPPlayer.Position - HRPSelf.Position).Magnitude
+
+                if Magnitude <= Configuration.Kill_Aura_Range then
+                    local Old_Position = HRPSelf.Position
+                    local Old_CFrame = CurrentCamera.CFrame
+
+                    HRPSelf.CFrame = CFrame.new(HRPPlayer.Position + (-2 * HumanoidPlayer.MoveDirection))
+                    task.wait(.05)
+
+                    CurrentCamera.CFrame = CFrame.lookAt(HRPSelf.Position, HRPPlayer.Position)
+                    task.spawn(HitboxFunction, "attack", Configuration.Attack_Limbs[math.random(1, 2)], false, false)
+                    task.wait(.05)
+
+                    if Configuration.Void_Spam then
+                        HRPSelf.CFrame = CFrame.new(HRPPlayer.Position - Vector3.new(0, 5, 0))
+                    end
+                    task.wait(.05)
+
+                    HRPSelf.CFrame = CFrame.new(Old_Position)
+                    CurrentCamera.CFrame = Old_CFrame
+                end
+            end
+        end
+    end
+    task.wait()
+    end
+})
+
+local KillAuraToggle = CombatSection:Toggle({
+    Name = "slam Aura",
+    Flag = "Kill Aura",
+    Default = false,
+    Callback = function(Value)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local CurrentCamera = workspace.CurrentCamera
+
+local Configuration = {
+    Kill_Aura = true,
+    Kill_Aura_Range = 25,
+    Void_Spam = true,
+
+    Attack_Limbs = {
+        "LeftHand",
+        "RightHand"
+    }
+}
+
+local HitboxFunction = nil
+local function FindHitboxFunction()
+    for Index, Object in pairs(getgc(false)) do
+        if (typeof(Object) ~= "function") then
+            continue
+        end
+        if (islclosure(Object)) then
+            local Info = debug.getinfo(Object)
+            if (getfenv(Object).script == LocalPlayer.Character.Core) then
+                if (Info.currentline ~= 683) then
+                    continue
+                end
+                HitboxFunction = Object
+            end
+        end
+    end
+end
+FindHitboxFunction()
+LocalPlayer.CharacterAdded:Connect(FindHitboxFunction)
+
+local function Character()
+    if LocalPlayer.Character then
+        return LocalPlayer.Character
+    end
+    LocalPlayer.CharacterAdded:Wait()
+    return Character()
+end
+
+while (Configuration.Kill_Aura) do
+    for Index, Player in ipairs(Players:GetPlayers()) do
+        if (Player.Character and Player ~= LocalPlayer and Character():FindFirstChild("Fight")) then
+            local HRPPlayer = Player.Character:FindFirstChild("HumanoidRootPart")
+            local HumanoidPlayer = Player.Character:FindFirstChild("Humanoid")
+            local HRPSelf = Character():FindFirstChild("HumanoidRootPart")
+
+            if (HRPPlayer and HRPSelf and HumanoidPlayer.Health > 0) then
+                if (Player.Character:FindFirstChild("Highlight")) then
+                    local Highlight = Player.Character:FindFirstChild("Highlight")
+
+                    if Highlight.OutlineColor == Color3.fromRGB(143, 255, 137) then
+                        continue
+                    end
+                end
+                local Magnitude = (HRPPlayer.Position - HRPSelf.Position).Magnitude
+
+                if Magnitude <= Configuration.Kill_Aura_Range then
+                    local Old_Position = HRPSelf.Position
+                    local Old_CFrame = CurrentCamera.CFrame
+
+                    HRPSelf.CFrame = CFrame.new(HRPPlayer.Position + (-2 * HumanoidPlayer.MoveDirection))
+                    task.wait(.05)
+
+                    CurrentCamera.CFrame = CFrame.lookAt(HRPSelf.Position, HRPPlayer.Position)
+                    task.spawn(HitboxFunction, "slam", Configuration.Attack_Limbs[math.random(1, 2)], false, false)
+                    task.wait(.05)
+
+                    if Configuration.Void_Spam then
+                        HRPSelf.CFrame = CFrame.new(HRPPlayer.Position - Vector3.new(0, 5, 0))
+                    end
+                    task.wait(.05)
+
+                    HRPSelf.CFrame = CFrame.new(Old_Position)
+                    CurrentCamera.CFrame = Old_CFrame
+                end
+            end
+        end
+    end
+    task.wait()
+    end
+})
+
+local AutoFarmsPage = Window:Page({
+    Name = "Auto Farms",
+    SubPages = true,
+    Icon = "rbxassetid://85112456002145"
+})
+
+local FarmsSubPage = AutoFarmsPage:SubPage({
+    Name = "Local Farming Options",
+    Columns = 2
+})
+
+local AutofarmsSection = farmsSubPage:Section({
+    Name = "farm options",
+    Side = 1
+})
+
+local KillFarmToggle = CombatSection:Toggle({
+    Name = "Autofarm Kills",
+    Flag = "Kill Aura",
+    Default = false,
+    Callback = function(Value)
+while true do
+    local target = GetNextTarget()
+
+    if target then
+        local humanoid = target:FindFirstChild("Humanoid")
+
+        if humanoid then
+            repeat
+                task.wait()
+            until humanoid.Health <= 0
+            local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local CurrentCamera = workspace.CurrentCamera
+
+local Configuration = {
+    Kill_Aura = true,
+    Kill_Aura_Range = 25,
+    Void_Spam = true,
+
+    Attack_Limbs = {
+        "LeftHand",
+        "RightHand"
+    }
+}
+
+local HitboxFunction = nil
+local function FindHitboxFunction()
+    for Index, Object in pairs(getgc(false)) do
+        if (typeof(Object) ~= "function") then
+            continue
+        end
+        if (islclosure(Object)) then
+            local Info = debug.getinfo(Object)
+            if (getfenv(Object).script == LocalPlayer.Character.Core) then
+                if (Info.currentline ~= 683) then
+                    continue
+                end
+                HitboxFunction = Object
+            end
+        end
+    end
+end
+FindHitboxFunction()
+LocalPlayer.CharacterAdded:Connect(FindHitboxFunction)
+
+local function Character()
+    if LocalPlayer.Character then
+        return LocalPlayer.Character
+    end
+    LocalPlayer.CharacterAdded:Wait()
+    return Character()
+end
+
+while (Configuration.Kill_Aura) do
+    for Index, Player in ipairs(Players:GetPlayers()) do
+        if (Player.Character and Player ~= LocalPlayer and Character():FindFirstChild("Fight")) then
+            local HRPPlayer = Player.Character:FindFirstChild("HumanoidRootPart")
+            local HumanoidPlayer = Player.Character:FindFirstChild("Humanoid")
+            local HRPSelf = Character():FindFirstChild("HumanoidRootPart")
+
+            if (HRPPlayer and HRPSelf and HumanoidPlayer.Health > 0) then
+                if (Player.Character:FindFirstChild("Highlight")) then
+                    local Highlight = Player.Character:FindFirstChild("Highlight")
+
+                    if Highlight.OutlineColor == Color3.fromRGB(143, 255, 137) then
+                        continue
+                    end
+                end
+                local Magnitude = (HRPPlayer.Position - HRPSelf.Position).Magnitude
+
+                if Magnitude <= Configuration.Kill_Aura_Range then
+                    local Old_Position = HRPSelf.Position
+                    local Old_CFrame = CurrentCamera.CFrame
+
+                    HRPSelf.CFrame = CFrame.new(HRPPlayer.Position + (-2 * HumanoidPlayer.MoveDirection))
+                    task.wait(.05)
+
+                    CurrentCamera.CFrame = CFrame.lookAt(HRPSelf.Position, HRPPlayer.Position)
+                    task.spawn(HitboxFunction, "Attack", Configuration.Attack_Limbs[math.random(1, 2)], false, false)
+                    task.wait(.05)
+
+                    if Configuration.Void_Spam then
+                        HRPSelf.CFrame = CFrame.new(HRPPlayer.Position - Vector3.new(0, 5, 0))
+                    end
+                    task.wait(.05)
+
+                    HRPSelf.CFrame = CFrame.new(Old_Position)
+                    CurrentCamera.CFrame = Old_CFrame
+                end
+            end
+        end
+    end
+    task.wait()
+        end
+    end
+})
+
+local VisualsPage = Window:Page({
+    Name = "Visuals",
+    SubPages = true,
+    Icon = "rbxassetid://127234874352422"
+})
+
+local visualsSubPage = visualsPage:SubPage({
+    Name = "Local Esp Options",
+    Columns = 2
+})
+
+local VisualsSection = VisualsSubPage:Section({
+    Name = "esp options",
+    Side = 1
+})
+
+local SkeletonespToggle = VisualsSection:Toggle({
+    Name = "Skeleton esp",
+    Flag = "Esp",
+    Default = false,
+    Callback = function(Value)
+        local Players = game:GetService("Players")
+
+local R6Bones = {
+	{"Head", "Torso"},
+	{"Torso", "Left Arm"},
+	{"Torso", "Right Arm"},
+	{"Torso", "Left Leg"},
+	{"Torso", "Right Leg"},
+}
+
+local R15Bones = {
+	{"Head", "UpperTorso"},
+	{"UpperTorso", "LowerTorso"},
+
+	{"UpperTorso", "LeftUpperArm"},
+	{"LeftUpperArm", "LeftLowerArm"},
+	{"LeftLowerArm", "LeftHand"},
+
+	{"UpperTorso", "RightUpperArm"},
+	{"RightUpperArm", "RightLowerArm"},
+	{"RightLowerArm", "RightHand"},
+
+	{"LowerTorso", "LeftUpperLeg"},
+	{"LeftUpperLeg", "LeftLowerLeg"},
+	{"LeftLowerLeg", "LeftFoot"},
+
+	{"LowerTorso", "RightUpperLeg"},
+	{"RightUpperLeg", "RightLowerLeg"},
+	{"RightLowerLeg", "RightFoot"},
+}
+
+local function CreateHighlight(character)
+	if character:FindFirstChild("ESPHighlight") then
+		return
+	end
+
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "ESPHighlight"
+	highlight.Adornee = character
+	highlight.FillTransparency = 1
+	highlight.OutlineTransparency = 0
+	highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	highlight.Parent = character
+end
+
+local function GetBones(character)
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then
+		return nil
+	end
+
+	if humanoid.RigType == Enum.HumanoidRigType.R6 then
+		return R6Bones
+	else
+		return R15Bones
+	end
+end
+
+local function SetupCharacter(character)
+	CreateHighlight(character)
+
+	local bones = GetBones(character)
+	if not bones then
+		return
+	end
+
+	for _, bone in ipairs(bones) do
+		local part0 = character:FindFirstChild(bone[1])
+		local part1 = character:FindFirstChild(bone[2])
+
+		if part0 and part1 then
+			print(("Draw line: %s -> %s"):format(part0.Name, part1.Name))
+
+			-- Replace this print with your line drawing code
+			-- if you're using Beam, LineHandleAdornment,
+			-- or another visualization method.
+		end
+	end
+end
+
+local function PlayerAdded(player)
+	player.CharacterAdded:Connect(SetupCharacter)
+
+	if player.Character then
+		SetupCharacter(player.Character)
+	end
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+	PlayerAdded(player)
+end
+
+Players.PlayerAdded:Connect(PlayerAdded)
+   end
+})
+
+local BoxespToggle = VisualsSection:Toggle({
+    Name = "Skeleton esp",
+    Flag = "Esp",
+    Default = false,
+    Callback = function(Value)
+        local Players = game:GetService("Players")
+
+local function AddBoxESP(character)
+	if character:FindFirstChild("BoxESP") then
+		return
+	end
+
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "BoxESP"
+	highlight.Adornee = character
+	highlight.FillTransparency = 1 -- no fill
+	highlight.OutlineTransparency = 0
+	highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	highlight.Parent = character
+end
+
+local function SetupPlayer(player)
+	player.CharacterAdded:Connect(function(character)
+		AddBoxESP(character)
+	end)
+
+	if player.Character then
+		AddBoxESP(player.Character)
+	end
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+	SetupPlayer(player)
+end
+
+Players.PlayerAdded:Connect(SetupPlayer)
+   end
+})
+
+Library:CreateSettingsPage(Window, Watermark, KeyList)
