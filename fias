@@ -1,4 +1,4 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/NIcoGabrielRealYtr/Midnight-Hub-Library/refs/heads/main/Source"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/villainslarkkk/Midnight-ui/refs/heads/main/Midnight%20ui"))()
 
 local Window = Library:Window({
     Name = "Villain.gg"
