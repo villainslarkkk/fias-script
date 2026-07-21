@@ -32,7 +32,7 @@ selfSection:Dropdown({
     Flag = "styles",
     Default = "HitMan",
     Items = {
-        "HitMan",
+        "Hitman",
         "Philly",
         "Boxer",
         "Stud",
@@ -64,12 +64,9 @@ local selfSection = selfSubPage:Section({
 })
 
 local Locations = {
-    Gym = CFrame.new(-200.762177, 4.49409294, -11.9695215),
-    Outside = CFrame.new(-218.090515, 4.49505663, -155.989746),
-    LockerRoom = CFrame.new(-100.200127, 4.49409246, -29.9776249),
-    Library = CFrame.new(-124.827629, 4.49459267, 126.185669),
-    Cafeteria = CFrame.new(-340.142059, 4.49459267, 121.162399),
-    Roof = CFrame.new(-195.359451, 41.4945908, -54.2340965)
+    Gym = CFrame.new(-440.546021, 38.5798569, -576.225708),
+    Outside = CFrame.new(-407.656281, 38.569561, -364.13678),
+    Cafeteria = CFrame.new(-189.53717, 28.5695591, 387.99234),
 }
 
 local SelectedTeleport = "Gym"
