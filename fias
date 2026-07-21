@@ -64,12 +64,29 @@ local selfSection = selfSubPage:Section({
 })
 
 local Locations = {
-    Gym = CFrame.new(-440.546021, 38.5798569, -576.225708),
-    Outside = CFrame.new(-407.656281, 38.569561, -364.13678),
-    Cafeteria = CFrame.new(-189.53717, 28.5695591, 387.99234),
+    Gym = CFrame.new(
+        -440.546021, 38.5798569, -576.225708,
+        -0.99914223, -3.57712757e-08, -0.041410286,
+        -3.17995372e-08, 1, -9.65705453e-08,
+        0.041410286, -9.51708827e-08, -0.99914223
+    ),
+
+    Outside = CFrame.new(
+        -407.656281, 38.569561, -364.13678,
+        -0.0978909209, -1.68858545e-08, -0.995197177,
+        3.92845825e-11, 1, -1.69712102e-08,
+        0.995197177, -1.70042325e-09, -0.0978909209
+    ),
+
+    Cafeteria = CFrame.new(
+        -189.53717, 28.5695591, 387.99234,
+        -0.942671955, 2.71384586e-08, 0.333720803,
+        4.53814941e-09, 1, -6.85017909e-08,
+        -0.333720803, -6.30602415e-08, -0.942671955
+    )
 }
 
-local SelectedTeleport = "Gym"
+local SelectedTeleport = "none"
 
 selfSection:Dropdown({
     Name = "Locations",
@@ -78,11 +95,9 @@ selfSection:Dropdown({
     Items = {
         "Gym",
         "Outside",
-        "LockerRoom",
-        "Library",
         "Cafeteria",
-        "Roof"
     },
+
     Callback = function(Value)
         SelectedTeleport = Value
     end
